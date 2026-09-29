@@ -95,3 +95,43 @@ export function updateClue(category: Category, clueId: string, updater: (c: Clue
     clues: category.clues.map((cl) => (cl.id === clueId ? updater(cl) : cl)),
   };
 }
+
+export interface ClueRef {
+  categoryId: string;
+  clueId: string;
+}
+
+/**
+ * Swaps the editable content (prompt/answer/media) of two clues, wherever they sit
+ * in the round — same category or different. Each clue's `id` and `value` stay put,
+ * since `value` is tied to row position: the content just moves to a new money slot,
+ * so it always lands with the correct value already attached.
+ */
+export function swapClueContent(round: Round, a: ClueRef, b: ClueRef): Round {
+  if (a.categoryId === b.categoryId && a.clueId === b.clueId) return round;
+
+  const findClue = (ref: ClueRef): Clue | undefined =>
+    round.categories.find((c) => c.id === ref.categoryId)?.clues.find((cl) => cl.id === ref.clueId);
+
+  const clueA = findClue(a);
+  const clueB = findClue(b);
+  if (!clueA || !clueB) return round;
+
+  const contentA = { prompt: clueA.prompt, answer: clueA.answer, media: clueA.media };
+  const contentB = { prompt: clueB.prompt, answer: clueB.answer, media: clueB.media };
+
+  return {
+    ...round,
+    categories: round.categories.map((cat) => {
+      if (cat.id !== a.categoryId && cat.id !== b.categoryId) return cat;
+      return {
+        ...cat,
+        clues: cat.clues.map((cl) => {
+          if (cat.id === a.categoryId && cl.id === a.clueId) return { ...cl, ...contentB };
+          if (cat.id === b.categoryId && cl.id === b.clueId) return { ...cl, ...contentA };
+          return cl;
+        }),
+      };
+    }),
+  };
+}
