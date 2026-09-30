@@ -5,13 +5,19 @@ interface Props {
   category: Category;
   clue: Clue;
   stage: RevealStage;
+  wager: { teamName: string; amount: number } | null;
   onRevealAnswer: () => void;
   onCloseNoScore: () => void;
 }
 
-export default function CluePanel({ category, clue, stage, onRevealAnswer, onCloseNoScore }: Props) {
+export default function CluePanel({ category, clue, stage, wager, onRevealAnswer, onCloseNoScore }: Props) {
   return (
     <div className="rounded-lg border border-gold/40 bg-slate-900 p-5">
+      {wager && (
+        <p className="mb-2 inline-block rounded-md bg-gold/20 px-2 py-1 text-sm font-semibold text-gold">
+          ⭐ {wager.teamName} wagered ${wager.amount}
+        </p>
+      )}
       <p className="mb-1 text-sm uppercase tracking-wide text-slate-400">
         {category.name} · ${clue.value}
       </p>

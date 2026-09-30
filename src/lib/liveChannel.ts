@@ -1,6 +1,6 @@
 import { Game, RoundId } from '../types';
 
-export type RevealStage = 'board' | 'question' | 'answer';
+export type RevealStage = 'board' | 'wager' | 'question' | 'answer';
 
 export interface TeamScore {
   id: string;
@@ -15,10 +15,16 @@ export interface ActiveClueRef {
   value: number;
 }
 
+export interface ActiveWager {
+  teamId: string;
+  amount: number;
+}
+
 export interface LiveState {
   gameId: string;
   currentRound: RoundId;
   activeClue: ActiveClueRef | null;
+  activeWager: ActiveWager | null;
   revealStage: RevealStage;
   answeredClueIds: string[];
   teams: TeamScore[];
@@ -40,6 +46,7 @@ export function freshLiveState(game: Game): LiveState {
     gameId: game.id,
     currentRound: 'round1',
     activeClue: null,
+    activeWager: null,
     revealStage: 'board',
     answeredClueIds: [],
     teams: game.teams.map((t) => ({ id: t.id, name: t.name, color: t.color, score: 0 })),

@@ -6,6 +6,7 @@ import { useHostLive } from '../store/useHostLive';
 import MiniBoard from '../components/host/MiniBoard';
 import CluePanel from '../components/host/CluePanel';
 import ScorePanel from '../components/host/ScorePanel';
+import WagerPanel from '../components/host/WagerPanel';
 
 export default function Host() {
   const { gameId } = useParams<{ gameId: string }>();
@@ -16,6 +17,9 @@ export default function Host() {
   const resetMatch = useHostLive((s) => s.resetMatch);
   const setRound = useHostLive((s) => s.setRound);
   const openClue = useHostLive((s) => s.openClue);
+  const openWagerClue = useHostLive((s) => s.openWagerClue);
+  const confirmWager = useHostLive((s) => s.confirmWager);
+  const cancelActiveClue = useHostLive((s) => s.cancelActiveClue);
   const revealAnswer = useHostLive((s) => s.revealAnswer);
   const closeWithoutScoring = useHostLive((s) => s.closeWithoutScoring);
 
@@ -45,6 +49,9 @@ export default function Host() {
   const activeClueObj = activeCategory?.clues.find((c) => c.id === live.activeClue!.clueId);
   const roundClueCount = round.categories.reduce((n, c) => n + c.clues.length, 0);
   const roundComplete = round.categories.length > 0 && live.answeredClueIds.filter((id) => round.categories.some((c) => c.clues.some((cl) => cl.id === id))).length >= roundClueCount;
+  const wagerInfo = live.activeWager
+    ? { teamName: live.teams.find((t) => t.id === live.activeWager!.teamId)?.name ?? 'Unknown team', amount: live.activeWager.amount }
+    : null;
 
   return (
     <div className="mx-auto min-h-screen max-w-7xl px-6 py-6">
@@ -103,14 +110,28 @@ export default function Host() {
             answeredClueIds={live.answeredClueIds}
             activeClueId={live.activeClue?.clueId ?? null}
             locked={!!live.activeClue}
-            onOpenClue={(categoryId, clue) => openClue({ categoryId, clueId: clue.id, value: clue.value })}
+            onOpenClue={(categoryId, clue) => {
+              const ref = { categoryId, clueId: clue.id, value: clue.value };
+              if (clue.isWager) openWagerClue(ref);
+              else openClue(ref);
+            }}
           />
 
-          {activeCategory && activeClueObj && (
+          {live.revealStage === 'wager' && (
+            <WagerPanel
+              teams={live.teams}
+              roundMaxValue={round.values[round.values.length - 1]}
+              onConfirm={confirmWager}
+              onCancel={cancelActiveClue}
+            />
+          )}
+
+          {live.revealStage !== 'wager' && activeCategory && activeClueObj && (
             <CluePanel
               category={activeCategory}
               clue={activeClueObj}
               stage={live.revealStage}
+              wager={wagerInfo}
               onRevealAnswer={revealAnswer}
               onCloseNoScore={closeWithoutScoring}
             />

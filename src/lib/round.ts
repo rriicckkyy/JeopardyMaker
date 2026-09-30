@@ -22,6 +22,7 @@ export function makeClue(value: number): Clue {
     prompt: '',
     answer: '',
     media: null,
+    isWager: false,
   };
 }
 
@@ -102,10 +103,10 @@ export interface ClueRef {
 }
 
 /**
- * Swaps the editable content (prompt/answer/media) of two clues, wherever they sit
- * in the round — same category or different. Each clue's `id` and `value` stay put,
- * since `value` is tied to row position: the content just moves to a new money slot,
- * so it always lands with the correct value already attached.
+ * Swaps the editable content (prompt/answer/media/wager flag) of two clues, wherever
+ * they sit in the round — same category or different. Each clue's `id` and `value`
+ * stay put, since `value` is tied to row position: the content just moves to a new
+ * money slot, so it always lands with the correct value already attached.
  */
 export function swapClueContent(round: Round, a: ClueRef, b: ClueRef): Round {
   if (a.categoryId === b.categoryId && a.clueId === b.clueId) return round;
@@ -117,8 +118,8 @@ export function swapClueContent(round: Round, a: ClueRef, b: ClueRef): Round {
   const clueB = findClue(b);
   if (!clueA || !clueB) return round;
 
-  const contentA = { prompt: clueA.prompt, answer: clueA.answer, media: clueA.media };
-  const contentB = { prompt: clueB.prompt, answer: clueB.answer, media: clueB.media };
+  const contentA = { prompt: clueA.prompt, answer: clueA.answer, media: clueA.media, isWager: clueA.isWager };
+  const contentB = { prompt: clueB.prompt, answer: clueB.answer, media: clueB.media, isWager: clueB.isWager };
 
   return {
     ...round,

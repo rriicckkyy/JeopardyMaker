@@ -18,6 +18,9 @@ interface HostLiveStore {
   resetMatch: (game: Game) => void;
   setRound: (round: 'round1' | 'round2') => void;
   openClue: (ref: ActiveClueRef) => void;
+  openWagerClue: (ref: ActiveClueRef) => void;
+  confirmWager: (teamId: string, amount: number) => void;
+  cancelActiveClue: () => void;
   revealAnswer: () => void;
   awardAndClose: (teamId: string, delta: number) => void;
   penalizeKeepOpen: (teamId: string, delta: number) => void;
@@ -67,6 +70,7 @@ export const useHostLive = create<HostLiveStore>((set, get) => ({
       ...current,
       currentRound: round,
       activeClue: null,
+      activeWager: null,
       revealStage: 'board',
       updatedAt: Date.now(),
     };
@@ -78,7 +82,57 @@ export const useHostLive = create<HostLiveStore>((set, get) => ({
   openClue: (ref) => {
     const current = get().live;
     if (!current || isClueAnswered(current, ref.clueId)) return;
-    const live: LiveState = { ...current, activeClue: ref, revealStage: 'question', updatedAt: Date.now() };
+    const live: LiveState = {
+      ...current,
+      activeClue: ref,
+      activeWager: null,
+      revealStage: 'question',
+      updatedAt: Date.now(),
+    };
+    persistLiveState(live);
+    set({ live });
+    get().channel?.postMessage({ type: 'sync', state: live });
+  },
+
+  openWagerClue: (ref) => {
+    const current = get().live;
+    if (!current || isClueAnswered(current, ref.clueId)) return;
+    const live: LiveState = {
+      ...current,
+      activeClue: ref,
+      activeWager: null,
+      revealStage: 'wager',
+      updatedAt: Date.now(),
+    };
+    persistLiveState(live);
+    set({ live });
+    get().channel?.postMessage({ type: 'sync', state: live });
+  },
+
+  confirmWager: (teamId, amount) => {
+    const current = get().live;
+    if (!current || !current.activeClue || current.revealStage !== 'wager') return;
+    const live: LiveState = {
+      ...current,
+      activeWager: { teamId, amount },
+      revealStage: 'question',
+      updatedAt: Date.now(),
+    };
+    persistLiveState(live);
+    set({ live });
+    get().channel?.postMessage({ type: 'sync', state: live });
+  },
+
+  cancelActiveClue: () => {
+    const current = get().live;
+    if (!current || !current.activeClue) return;
+    const live: LiveState = {
+      ...current,
+      activeClue: null,
+      activeWager: null,
+      revealStage: 'board',
+      updatedAt: Date.now(),
+    };
     persistLiveState(live);
     set({ live });
     get().channel?.postMessage({ type: 'sync', state: live });
@@ -102,6 +156,7 @@ export const useHostLive = create<HostLiveStore>((set, get) => ({
       teams: current.teams.map((t) => (t.id === teamId ? { ...t, score: t.score + delta } : t)),
       answeredClueIds: [...current.answeredClueIds, clueId],
       activeClue: null,
+      activeWager: null,
       revealStage: 'board',
       updatedAt: Date.now(),
     };
@@ -130,6 +185,7 @@ export const useHostLive = create<HostLiveStore>((set, get) => ({
       ...current,
       answeredClueIds: [...current.answeredClueIds, current.activeClue.clueId],
       activeClue: null,
+      activeWager: null,
       revealStage: 'board',
       updatedAt: Date.now(),
     };

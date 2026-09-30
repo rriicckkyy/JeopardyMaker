@@ -16,6 +16,7 @@ export default function ClueEditModal({ clue, categoryName, onClose, onSave }: P
   const [answer, setAnswer] = useState(clue.answer);
   const [keepMedia, setKeepMedia] = useState<ClueMedia | null>(clue.media);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [isWager, setIsWager] = useState(clue.isWager);
   const [saving, setSaving] = useState(false);
 
   async function handleSave() {
@@ -38,7 +39,7 @@ export default function ClueEditModal({ clue, categoryName, onClose, onSave }: P
         finalMedia = null;
       }
 
-      onSave({ ...clue, prompt, answer, media: finalMedia });
+      onSave({ ...clue, prompt, answer, media: finalMedia, isWager });
     } finally {
       setSaving(false);
     }
@@ -72,6 +73,22 @@ export default function ClueEditModal({ clue, categoryName, onClose, onSave }: P
           className="mb-4 w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 focus:border-gold focus:outline-none"
           placeholder="e.g. What is Mars?"
         />
+
+        <label className="mb-4 flex items-start gap-2 rounded-md border border-slate-700 bg-slate-800/60 px-3 py-2 text-sm">
+          <input
+            type="checkbox"
+            checked={isWager}
+            onChange={(e) => setIsWager(e.target.checked)}
+            className="mt-0.5 h-4 w-4 shrink-0 accent-gold"
+          />
+          <span>
+            <span className="font-semibold text-gold">⭐ Wager clue</span>
+            <span className="block text-xs text-slate-400">
+              When opened, the host picks a team and a bet amount before revealing it — win or
+              lose the wager instead of the slot's fixed value.
+            </span>
+          </span>
+        </label>
 
         <label className="mb-1 block text-sm text-slate-400">Media (optional)</label>
         <MediaDropzone

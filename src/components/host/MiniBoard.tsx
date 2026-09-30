@@ -39,7 +39,16 @@ export default function MiniBoard({ round, answeredClueIds, activeClueId, locked
                     : 'bg-board-dark hover:bg-board disabled:opacity-40'
               }`}
             >
-              {answered ? '' : `$${value}`}
+              {!answered && (
+                <span className="relative">
+                  ${value}
+                  {clue.isWager && (
+                    <span className="absolute -right-3 -top-2 text-[10px]" title="Wager clue">
+                      ⭐
+                    </span>
+                  )}
+                </span>
+              )}
             </button>
           );
         }),

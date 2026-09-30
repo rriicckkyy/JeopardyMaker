@@ -18,6 +18,9 @@ export default function Editor() {
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isFirstLoad = useRef(true);
+  const gameRef = useRef(game);
+  gameRef.current = game;
+  const pendingSaveRef = useRef(false);
 
   useEffect(() => {
     if (!gameId) return;
@@ -37,9 +40,11 @@ export default function Editor() {
       return;
     }
     setSaveStatus('saving');
+    pendingSaveRef.current = true;
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(async () => {
       await saveGame(game);
+      pendingSaveRef.current = false;
       setSaveStatus('saved');
     }, 500);
     return () => {
@@ -47,6 +52,16 @@ export default function Editor() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game]);
+
+  // Flush any still-pending debounced save when leaving the page (e.g. clicking
+  // "Play This Game" right after an edit), so a quick navigation can't drop it.
+  useEffect(() => {
+    return () => {
+      if (pendingSaveRef.current && gameRef.current) {
+        saveGame(gameRef.current);
+      }
+    };
+  }, []);
 
   if (notFound) {
     return (

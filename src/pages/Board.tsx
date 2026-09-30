@@ -64,6 +64,9 @@ export default function Board() {
     ? round.categories.find((c) => c.id === live.activeClue!.categoryId)
     : null;
   const activeClueObj = activeCategory?.clues.find((c) => c.id === live.activeClue!.clueId);
+  const wagerInfo = live.activeWager
+    ? { teamName: live.teams.find((t) => t.id === live.activeWager!.teamId)?.name ?? 'Unknown team', amount: live.activeWager.amount }
+    : null;
 
   return (
     <div className="flex h-screen flex-col bg-board-darker p-4">
@@ -84,7 +87,12 @@ export default function Board() {
 
       <AnimatePresence>
         {activeCategory && activeClueObj && (
-          <ClueOverlay clue={activeClueObj} category={activeCategory} stage={live.revealStage} />
+          <ClueOverlay
+            clue={activeClueObj}
+            category={activeCategory}
+            stage={live.revealStage}
+            wager={wagerInfo}
+          />
         )}
       </AnimatePresence>
     </div>

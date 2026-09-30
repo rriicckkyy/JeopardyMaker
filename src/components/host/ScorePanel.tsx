@@ -4,6 +4,8 @@ import { useHostLive } from '../../store/useHostLive';
 
 function TeamCard({ team }: { team: TeamScore }) {
   const activeClue = useHostLive((s) => s.live?.activeClue ?? null);
+  const activeWager = useHostLive((s) => s.live?.activeWager ?? null);
+  const revealStage = useHostLive((s) => s.live?.revealStage ?? 'board');
   const awardAndClose = useHostLive((s) => s.awardAndClose);
   const penalizeKeepOpen = useHostLive((s) => s.penalizeKeepOpen);
   const adjustScore = useHostLive((s) => s.adjustScore);
@@ -16,6 +18,9 @@ function TeamCard({ team }: { team: TeamScore }) {
     if (!Number.isNaN(value)) setScore(team.id, value);
     setEditing(false);
   }
+
+  const normalClueActive = activeClue && revealStage !== 'wager' && !activeWager;
+  const myWager = activeWager && activeWager.teamId === team.id ? activeWager : null;
 
   return (
     <div className="rounded-lg border border-slate-800 bg-slate-900 p-4">
@@ -47,7 +52,24 @@ function TeamCard({ team }: { team: TeamScore }) {
         </button>
       )}
 
-      {activeClue ? (
+      {myWager ? (
+        <div className="flex gap-2">
+          <button
+            onClick={() => awardAndClose(team.id, myWager.amount)}
+            className="flex-1 rounded-md bg-emerald-600 py-2 text-sm font-semibold hover:bg-emerald-500"
+          >
+            ✓ +{myWager.amount}
+          </button>
+          <button
+            onClick={() => awardAndClose(team.id, -myWager.amount)}
+            className="flex-1 rounded-md bg-red-700 py-2 text-sm font-semibold hover:bg-red-600"
+          >
+            ✗ −{myWager.amount}
+          </button>
+        </div>
+      ) : activeWager ? (
+        <p className="text-center text-xs text-slate-500">Not wagering this clue</p>
+      ) : normalClueActive ? (
         <div className="flex gap-2">
           <button
             onClick={() => awardAndClose(team.id, activeClue.value)}

@@ -14,6 +14,8 @@ export interface Clue {
   prompt: string;
   answer: string;
   media: ClueMedia | null;
+  /** a Wager clue: the host picks a team and a bet amount before revealing it, instead of playing for the slot's fixed value */
+  isWager: boolean;
 }
 
 export interface Category {

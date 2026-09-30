@@ -170,7 +170,14 @@ export default function RoundGrid({ round, onChange }: Props) {
                       : 'border-dashed border-slate-700 bg-slate-900 hover:border-slate-500'
                 } ${isSource ? 'opacity-30' : ''}`}
               >
-                <span className="font-display text-lg text-gold">${value}</span>
+                <span className="relative font-display text-lg text-gold">
+                  ${value}
+                  {clue.isWager && (
+                    <span className="absolute -right-3 -top-1 text-xs" title="Wager clue">
+                      ⭐
+                    </span>
+                  )}
+                </span>
                 {clue.media && <span className="text-xs">{MEDIA_ICON[clue.media.type]}</span>}
                 <span className="line-clamp-2 text-xs text-slate-400">
                   {filled ? clue.prompt : 'Click to add clue'}
