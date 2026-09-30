@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { Game } from '../types';
 import { loadGame } from '../lib/db';
 import { useHostLive } from '../store/useHostLive';
+import { useCountdown } from '../hooks/useCountdown';
 import MiniBoard from '../components/host/MiniBoard';
 import CluePanel from '../components/host/CluePanel';
 import ScorePanel from '../components/host/ScorePanel';
@@ -22,6 +23,9 @@ export default function Host() {
   const cancelActiveClue = useHostLive((s) => s.cancelActiveClue);
   const revealAnswer = useHostLive((s) => s.revealAnswer);
   const closeWithoutScoring = useHostLive((s) => s.closeWithoutScoring);
+  const resetTimer = useHostLive((s) => s.resetTimer);
+  const setTimerDuration = useHostLive((s) => s.setTimerDuration);
+  const secondsLeft = useCountdown(useHostLive((s) => s.live?.timerDeadline ?? null));
 
   useEffect(() => {
     if (!gameId) return;
@@ -65,7 +69,19 @@ export default function Host() {
             Edit game
           </Link>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
+          <label className="flex items-center gap-1 text-sm text-slate-400">
+            Timer
+            <input
+              type="number"
+              min={3}
+              max={300}
+              value={live.timerDurationSec}
+              onChange={(e) => setTimerDuration(parseInt(e.target.value, 10) || live.timerDurationSec)}
+              className="w-16 rounded-md border border-slate-700 bg-slate-800 px-2 py-1 text-center text-white"
+            />
+            s
+          </label>
           <button
             onClick={openBoardWindow}
             className="rounded-md bg-board px-4 py-2 text-sm font-semibold hover:bg-board-dark"
@@ -132,8 +148,10 @@ export default function Host() {
               clue={activeClueObj}
               stage={live.revealStage}
               wager={wagerInfo}
+              secondsLeft={secondsLeft}
               onRevealAnswer={revealAnswer}
               onCloseNoScore={closeWithoutScoring}
+              onResetTimer={resetTimer}
             />
           )}
         </div>

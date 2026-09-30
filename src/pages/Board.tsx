@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { Game } from '../types';
 import { loadGame } from '../lib/db';
 import { useBoardLive } from '../store/useBoardLive';
+import { useCountdown } from '../hooks/useCountdown';
 import BoardGrid from '../components/board/BoardGrid';
 import ClueOverlay from '../components/board/ClueOverlay';
 
@@ -14,6 +15,7 @@ export default function Board() {
   const live = useBoardLive((s) => s.live);
   const init = useBoardLive((s) => s.init);
   const teardown = useBoardLive((s) => s.teardown);
+  const secondsLeft = useCountdown(live?.timerDeadline ?? null);
 
   useEffect(() => {
     if (!gameId) return;
@@ -92,6 +94,7 @@ export default function Board() {
             category={activeCategory}
             stage={live.revealStage}
             wager={wagerInfo}
+            secondsLeft={secondsLeft}
           />
         )}
       </AnimatePresence>

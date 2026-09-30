@@ -6,18 +6,47 @@ interface Props {
   clue: Clue;
   stage: RevealStage;
   wager: { teamName: string; amount: number } | null;
+  secondsLeft: number | null;
   onRevealAnswer: () => void;
   onCloseNoScore: () => void;
+  onResetTimer: () => void;
 }
 
-export default function CluePanel({ category, clue, stage, wager, onRevealAnswer, onCloseNoScore }: Props) {
+export default function CluePanel({
+  category,
+  clue,
+  stage,
+  wager,
+  secondsLeft,
+  onRevealAnswer,
+  onCloseNoScore,
+  onResetTimer,
+}: Props) {
   return (
     <div className="rounded-lg border border-gold/40 bg-slate-900 p-5">
-      {wager && (
-        <p className="mb-2 inline-block rounded-md bg-gold/20 px-2 py-1 text-sm font-semibold text-gold">
-          ⭐ {wager.teamName} wagered ${wager.amount}
-        </p>
-      )}
+      <div className="mb-2 flex flex-wrap items-center gap-2">
+        {wager && (
+          <p className="inline-block rounded-md bg-gold/20 px-2 py-1 text-sm font-semibold text-gold">
+            ⭐ {wager.teamName} wagered ${wager.amount}
+          </p>
+        )}
+        {secondsLeft !== null && (
+          <div
+            className={`ml-auto flex items-center gap-2 rounded-md px-2 py-1 text-sm font-semibold ${
+              secondsLeft === 0 ? 'bg-red-900 text-red-200' : 'bg-slate-800 text-gold'
+            }`}
+          >
+            <span>⏱ {secondsLeft}s</span>
+            <button
+              onClick={onResetTimer}
+              className="rounded border border-slate-600 px-2 py-0.5 text-xs font-normal text-slate-300 hover:bg-slate-700"
+              title="Restart the timer, e.g. if you were interrupted"
+            >
+              Reset
+            </button>
+          </div>
+        )}
+      </div>
       <p className="mb-1 text-sm uppercase tracking-wide text-slate-400">
         {category.name} · ${clue.value}
       </p>

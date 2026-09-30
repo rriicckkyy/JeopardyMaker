@@ -20,6 +20,8 @@ export interface ActiveWager {
   amount: number;
 }
 
+export const DEFAULT_TIMER_SECONDS = 15;
+
 export interface LiveState {
   gameId: string;
   currentRound: RoundId;
@@ -28,6 +30,10 @@ export interface LiveState {
   revealStage: RevealStage;
   answeredClueIds: string[];
   teams: TeamScore[];
+  /** how long a fresh/reset timer counts down from, in seconds */
+  timerDurationSec: number;
+  /** epoch ms the timer reaches zero at; null means no timer is running */
+  timerDeadline: number | null;
   updatedAt: number;
 }
 
@@ -50,6 +56,8 @@ export function freshLiveState(game: Game): LiveState {
     revealStage: 'board',
     answeredClueIds: [],
     teams: game.teams.map((t) => ({ id: t.id, name: t.name, color: t.color, score: 0 })),
+    timerDurationSec: DEFAULT_TIMER_SECONDS,
+    timerDeadline: null,
     updatedAt: Date.now(),
   };
 }

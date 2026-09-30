@@ -8,9 +8,10 @@ interface Props {
   category: Category;
   stage: RevealStage;
   wager: { teamName: string; amount: number } | null;
+  secondsLeft: number | null;
 }
 
-export default function ClueOverlay({ clue, category, stage, wager }: Props) {
+export default function ClueOverlay({ clue, category, stage, wager, secondsLeft }: Props) {
   const mediaUrl = useMediaUrl(clue.media?.id);
   const displayValue = wager ? wager.amount : clue.value;
 
@@ -42,6 +43,16 @@ export default function ClueOverlay({ clue, category, stage, wager }: Props) {
             <p className="rounded-md bg-gold/20 px-3 py-1 text-sm font-semibold text-gold md:text-base">
               ⭐ {wager.teamName} wagered ${wager.amount}
             </p>
+          )}
+
+          {stage === 'question' && secondsLeft !== null && (
+            <div
+              className={`absolute right-4 top-4 rounded-full px-4 py-2 font-display text-2xl shadow-lg md:right-6 md:top-6 md:text-4xl ${
+                secondsLeft === 0 ? 'bg-red-700 text-white' : 'bg-slate-950/80 text-gold'
+              }`}
+            >
+              {secondsLeft}
+            </div>
           )}
 
           <AnimatePresence mode="wait">

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { Game } from '../types';
 import {
   ActiveClueRef,
+  DEFAULT_TIMER_SECONDS,
   LiveState,
   clearLiveState,
   freshLiveState,
@@ -27,10 +28,21 @@ interface HostLiveStore {
   closeWithoutScoring: () => void;
   adjustScore: (teamId: string, delta: number) => void;
   setScore: (teamId: string, value: number) => void;
+  resetTimer: () => void;
+  setTimerDuration: (seconds: number) => void;
 }
 
 function isClueAnswered(state: LiveState, clueId: string) {
   return state.answeredClueIds.includes(clueId);
+}
+
+/** Old saved sessions from before the timer existed won't have this field yet. */
+function durationOf(state: LiveState): number {
+  return state.timerDurationSec ?? DEFAULT_TIMER_SECONDS;
+}
+
+function freshDeadline(state: LiveState): number {
+  return Date.now() + durationOf(state) * 1000;
 }
 
 export const useHostLive = create<HostLiveStore>((set, get) => ({
@@ -72,6 +84,7 @@ export const useHostLive = create<HostLiveStore>((set, get) => ({
       activeClue: null,
       activeWager: null,
       revealStage: 'board',
+      timerDeadline: null,
       updatedAt: Date.now(),
     };
     persistLiveState(live);
@@ -87,6 +100,7 @@ export const useHostLive = create<HostLiveStore>((set, get) => ({
       activeClue: ref,
       activeWager: null,
       revealStage: 'question',
+      timerDeadline: freshDeadline(current),
       updatedAt: Date.now(),
     };
     persistLiveState(live);
@@ -102,6 +116,7 @@ export const useHostLive = create<HostLiveStore>((set, get) => ({
       activeClue: ref,
       activeWager: null,
       revealStage: 'wager',
+      timerDeadline: null,
       updatedAt: Date.now(),
     };
     persistLiveState(live);
@@ -116,6 +131,7 @@ export const useHostLive = create<HostLiveStore>((set, get) => ({
       ...current,
       activeWager: { teamId, amount },
       revealStage: 'question',
+      timerDeadline: freshDeadline(current),
       updatedAt: Date.now(),
     };
     persistLiveState(live);
@@ -131,6 +147,7 @@ export const useHostLive = create<HostLiveStore>((set, get) => ({
       activeClue: null,
       activeWager: null,
       revealStage: 'board',
+      timerDeadline: null,
       updatedAt: Date.now(),
     };
     persistLiveState(live);
@@ -141,7 +158,12 @@ export const useHostLive = create<HostLiveStore>((set, get) => ({
   revealAnswer: () => {
     const current = get().live;
     if (!current || !current.activeClue) return;
-    const live: LiveState = { ...current, revealStage: 'answer', updatedAt: Date.now() };
+    const live: LiveState = {
+      ...current,
+      revealStage: 'answer',
+      timerDeadline: null,
+      updatedAt: Date.now(),
+    };
     persistLiveState(live);
     set({ live });
     get().channel?.postMessage({ type: 'sync', state: live });
@@ -158,6 +180,7 @@ export const useHostLive = create<HostLiveStore>((set, get) => ({
       activeClue: null,
       activeWager: null,
       revealStage: 'board',
+      timerDeadline: null,
       updatedAt: Date.now(),
     };
     persistLiveState(live);
@@ -187,6 +210,7 @@ export const useHostLive = create<HostLiveStore>((set, get) => ({
       activeClue: null,
       activeWager: null,
       revealStage: 'board',
+      timerDeadline: null,
       updatedAt: Date.now(),
     };
     persistLiveState(live);
@@ -215,6 +239,25 @@ export const useHostLive = create<HostLiveStore>((set, get) => ({
       teams: current.teams.map((t) => (t.id === teamId ? { ...t, score: value } : t)),
       updatedAt: Date.now(),
     };
+    persistLiveState(live);
+    set({ live });
+    get().channel?.postMessage({ type: 'sync', state: live });
+  },
+
+  resetTimer: () => {
+    const current = get().live;
+    if (!current || current.revealStage !== 'question') return;
+    const live: LiveState = { ...current, timerDeadline: freshDeadline(current), updatedAt: Date.now() };
+    persistLiveState(live);
+    set({ live });
+    get().channel?.postMessage({ type: 'sync', state: live });
+  },
+
+  setTimerDuration: (seconds) => {
+    const current = get().live;
+    if (!current) return;
+    const clamped = Math.max(3, Math.min(300, Math.round(seconds)));
+    const live: LiveState = { ...current, timerDurationSec: clamped, updatedAt: Date.now() };
     persistLiveState(live);
     set({ live });
     get().channel?.postMessage({ type: 'sync', state: live });
