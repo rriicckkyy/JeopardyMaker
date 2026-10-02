@@ -95,6 +95,7 @@ export default function Board() {
             stage={live.revealStage}
             wager={wagerInfo}
             secondsLeft={secondsLeft}
+            questionHidden={live.questionHidden}
           />
         )}
       </AnimatePresence>

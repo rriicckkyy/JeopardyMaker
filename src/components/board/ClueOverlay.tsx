@@ -9,9 +9,10 @@ interface Props {
   stage: RevealStage;
   wager: { teamName: string; amount: number } | null;
   secondsLeft: number | null;
+  questionHidden: boolean;
 }
 
-export default function ClueOverlay({ clue, category, stage, wager, secondsLeft }: Props) {
+export default function ClueOverlay({ clue, category, stage, wager, secondsLeft, questionHidden }: Props) {
   const mediaUrl = useMediaUrl(clue.media?.id);
   const displayValue = wager ? wager.amount : clue.value;
 
@@ -70,7 +71,20 @@ export default function ClueOverlay({ clue, category, stage, wager, secondsLeft 
               </motion.div>
             )}
 
-            {stage === 'question' && (
+            {stage === 'question' && questionHidden && (
+              <motion.div
+                key="hidden"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex flex-1 flex-col items-center justify-center gap-4"
+              >
+                <p className="text-6xl">🙈</p>
+                <p className="text-xl text-slate-400 md:text-2xl">Question hidden</p>
+              </motion.div>
+            )}
+
+            {stage === 'question' && !questionHidden && (
               <motion.div
                 key="question"
                 initial={{ opacity: 0 }}

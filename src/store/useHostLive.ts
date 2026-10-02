@@ -30,6 +30,7 @@ interface HostLiveStore {
   setScore: (teamId: string, value: number) => void;
   resetTimer: () => void;
   setTimerDuration: (seconds: number) => void;
+  toggleQuestionVisibility: () => void;
 }
 
 function isClueAnswered(state: LiveState, clueId: string) {
@@ -85,6 +86,7 @@ export const useHostLive = create<HostLiveStore>((set, get) => ({
       activeWager: null,
       revealStage: 'board',
       timerDeadline: null,
+      questionHidden: false,
       updatedAt: Date.now(),
     };
     persistLiveState(live);
@@ -101,6 +103,7 @@ export const useHostLive = create<HostLiveStore>((set, get) => ({
       activeWager: null,
       revealStage: 'question',
       timerDeadline: freshDeadline(current),
+      questionHidden: false,
       updatedAt: Date.now(),
     };
     persistLiveState(live);
@@ -117,6 +120,7 @@ export const useHostLive = create<HostLiveStore>((set, get) => ({
       activeWager: null,
       revealStage: 'wager',
       timerDeadline: null,
+      questionHidden: false,
       updatedAt: Date.now(),
     };
     persistLiveState(live);
@@ -132,6 +136,7 @@ export const useHostLive = create<HostLiveStore>((set, get) => ({
       activeWager: { teamId, amount },
       revealStage: 'question',
       timerDeadline: freshDeadline(current),
+      questionHidden: false,
       updatedAt: Date.now(),
     };
     persistLiveState(live);
@@ -148,6 +153,7 @@ export const useHostLive = create<HostLiveStore>((set, get) => ({
       activeWager: null,
       revealStage: 'board',
       timerDeadline: null,
+      questionHidden: false,
       updatedAt: Date.now(),
     };
     persistLiveState(live);
@@ -162,6 +168,7 @@ export const useHostLive = create<HostLiveStore>((set, get) => ({
       ...current,
       revealStage: 'answer',
       timerDeadline: null,
+      questionHidden: false,
       updatedAt: Date.now(),
     };
     persistLiveState(live);
@@ -181,6 +188,7 @@ export const useHostLive = create<HostLiveStore>((set, get) => ({
       activeWager: null,
       revealStage: 'board',
       timerDeadline: null,
+      questionHidden: false,
       updatedAt: Date.now(),
     };
     persistLiveState(live);
@@ -194,6 +202,9 @@ export const useHostLive = create<HostLiveStore>((set, get) => ({
     const live: LiveState = {
       ...current,
       teams: current.teams.map((t) => (t.id === teamId ? { ...t, score: t.score + delta } : t)),
+      // a wrong answer re-opens the clue for the next team, so the question
+      // needs to be back on screen for them to see, even if it was hidden
+      questionHidden: false,
       updatedAt: Date.now(),
     };
     persistLiveState(live);
@@ -211,6 +222,7 @@ export const useHostLive = create<HostLiveStore>((set, get) => ({
       activeWager: null,
       revealStage: 'board',
       timerDeadline: null,
+      questionHidden: false,
       updatedAt: Date.now(),
     };
     persistLiveState(live);
@@ -258,6 +270,15 @@ export const useHostLive = create<HostLiveStore>((set, get) => ({
     if (!current) return;
     const clamped = Math.max(3, Math.min(300, Math.round(seconds)));
     const live: LiveState = { ...current, timerDurationSec: clamped, updatedAt: Date.now() };
+    persistLiveState(live);
+    set({ live });
+    get().channel?.postMessage({ type: 'sync', state: live });
+  },
+
+  toggleQuestionVisibility: () => {
+    const current = get().live;
+    if (!current || current.revealStage !== 'question') return;
+    const live: LiveState = { ...current, questionHidden: !current.questionHidden, updatedAt: Date.now() };
     persistLiveState(live);
     set({ live });
     get().channel?.postMessage({ type: 'sync', state: live });

@@ -34,6 +34,8 @@ export interface LiveState {
   timerDurationSec: number;
   /** epoch ms the timer reaches zero at; null means no timer is running */
   timerDeadline: number | null;
+  /** host-controlled: hides the clue's content on the board while someone's answering */
+  questionHidden: boolean;
   updatedAt: number;
 }
 
@@ -58,6 +60,7 @@ export function freshLiveState(game: Game): LiveState {
     teams: game.teams.map((t) => ({ id: t.id, name: t.name, color: t.color, score: 0 })),
     timerDurationSec: DEFAULT_TIMER_SECONDS,
     timerDeadline: null,
+    questionHidden: false,
     updatedAt: Date.now(),
   };
 }

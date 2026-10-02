@@ -7,9 +7,11 @@ interface Props {
   stage: RevealStage;
   wager: { teamName: string; amount: number } | null;
   secondsLeft: number | null;
+  questionHidden: boolean;
   onRevealAnswer: () => void;
   onCloseNoScore: () => void;
   onResetTimer: () => void;
+  onToggleQuestionVisibility: () => void;
 }
 
 export default function CluePanel({
@@ -18,9 +20,11 @@ export default function CluePanel({
   stage,
   wager,
   secondsLeft,
+  questionHidden,
   onRevealAnswer,
   onCloseNoScore,
   onResetTimer,
+  onToggleQuestionVisibility,
 }: Props) {
   return (
     <div className="rounded-lg border border-gold/40 bg-slate-900 p-5">
@@ -28,6 +32,11 @@ export default function CluePanel({
         {wager && (
           <p className="inline-block rounded-md bg-gold/20 px-2 py-1 text-sm font-semibold text-gold">
             ⭐ {wager.teamName} wagered ${wager.amount}
+          </p>
+        )}
+        {stage === 'question' && questionHidden && (
+          <p className="inline-block rounded-md bg-slate-800 px-2 py-1 text-sm font-semibold text-slate-300">
+            🙈 Hidden on board
           </p>
         )}
         {secondsLeft !== null && (
@@ -65,6 +74,15 @@ export default function CluePanel({
             className="rounded-md bg-board px-4 py-2 text-sm font-semibold hover:bg-board-dark"
           >
             Reveal Answer on Board
+          </button>
+        )}
+        {stage === 'question' && (
+          <button
+            onClick={onToggleQuestionVisibility}
+            className="rounded-md border border-slate-700 px-4 py-2 text-sm hover:bg-slate-800"
+            title="Hide the clue on the board while someone answers, e.g. once they've buzzed in"
+          >
+            {questionHidden ? '👁 Show Question' : '🙈 Hide Question'}
           </button>
         )}
         <button

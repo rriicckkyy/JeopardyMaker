@@ -25,6 +25,7 @@ export default function Host() {
   const closeWithoutScoring = useHostLive((s) => s.closeWithoutScoring);
   const resetTimer = useHostLive((s) => s.resetTimer);
   const setTimerDuration = useHostLive((s) => s.setTimerDuration);
+  const toggleQuestionVisibility = useHostLive((s) => s.toggleQuestionVisibility);
   const secondsLeft = useCountdown(useHostLive((s) => s.live?.timerDeadline ?? null));
 
   useEffect(() => {
@@ -149,9 +150,11 @@ export default function Host() {
               stage={live.revealStage}
               wager={wagerInfo}
               secondsLeft={secondsLeft}
+              questionHidden={live.questionHidden}
               onRevealAnswer={revealAnswer}
               onCloseNoScore={closeWithoutScoring}
               onResetTimer={resetTimer}
+              onToggleQuestionVisibility={toggleQuestionVisibility}
             />
           )}
         </div>
