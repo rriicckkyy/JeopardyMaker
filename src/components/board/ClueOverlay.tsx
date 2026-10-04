@@ -98,8 +98,11 @@ export default function ClueOverlay({ clue, category, stage, wager, secondsLeft,
                 {clue.media?.type === 'video' && mediaUrl && (
                   <video src={mediaUrl} autoPlay controls className="max-h-[45vh] rounded-lg" />
                 )}
-                {clue.media?.type === 'audio' && mediaUrl && (
-                  <audio src={mediaUrl} autoPlay controls className="w-full max-w-md" />
+                {clue.media?.type === 'audio' && (
+                  <div className="flex flex-col items-center gap-2 text-slate-400">
+                    <span className="text-5xl">🔊</span>
+                    <span className="text-lg">Audio clue — playing from the host screen</span>
+                  </div>
                 )}
                 {clue.prompt && (
                   <p className="text-2xl font-semibold leading-snug md:text-4xl">{clue.prompt}</p>

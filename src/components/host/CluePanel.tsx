@@ -1,5 +1,6 @@
 import { Category, Clue } from '../../types';
 import { RevealStage } from '../../lib/liveChannel';
+import { useMediaUrl } from '../../hooks/useMediaUrl';
 
 interface Props {
   category: Category;
@@ -26,6 +27,9 @@ export default function CluePanel({
   onResetTimer,
   onToggleQuestionVisibility,
 }: Props) {
+  const media = clue.media;
+  const audioUrl = useMediaUrl(media && media.type === 'audio' ? media.id : null);
+
   return (
     <div className="rounded-lg border border-gold/40 bg-slate-900 p-5">
       <div className="mb-2 flex flex-wrap items-center gap-2">
@@ -65,7 +69,15 @@ export default function CluePanel({
       <p className="mb-4 text-emerald-400">
         Answer: {clue.answer || <em className="text-slate-500">not set</em>}
       </p>
-      {clue.media && <p className="mb-4 text-xs text-slate-500">Media attached: {clue.media.fileName}</p>}
+      {clue.media && <p className="mb-2 text-xs text-slate-500">Media attached: {clue.media.fileName}</p>}
+      {stage === 'question' && media?.type === 'audio' && audioUrl && (
+        <div className="mb-4">
+          <p className="mb-1 text-xs text-slate-500">
+            🔊 Plays from this computer — the board just shows an audio icon.
+          </p>
+          <audio src={audioUrl} autoPlay controls className="w-full" />
+        </div>
+      )}
 
       <div className="flex flex-wrap gap-2">
         {stage === 'question' && (
