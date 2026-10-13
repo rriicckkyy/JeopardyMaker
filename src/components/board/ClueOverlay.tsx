@@ -19,7 +19,7 @@ export default function ClueOverlay({ clue, category, stage, wager, secondsLeft,
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/90 p-6 md:p-14 perspective">
       <motion.div
-        className="relative aspect-video w-full max-w-6xl preserve-3d"
+        className="relative h-[75vh] max-h-[800px] w-full max-w-5xl preserve-3d"
         initial={{ rotateY: 0 }}
         animate={{ rotateY: 180 }}
         exit={{ rotateY: 0 }}
@@ -32,7 +32,7 @@ export default function ClueOverlay({ clue, category, stage, wager, secondsLeft,
         </div>
 
         <div
-          className="absolute inset-0 flex flex-col items-center justify-center gap-6 rounded-2xl bg-board-darker p-6 text-center shadow-2xl backface-hidden md:p-12"
+          className="absolute inset-0 flex flex-col items-center justify-center gap-6 overflow-y-auto rounded-2xl bg-board-darker p-6 text-center shadow-2xl backface-hidden md:p-12"
           style={{ transform: 'rotateY(180deg)' }}
         >
           {stage !== 'wager' && (
@@ -93,10 +93,19 @@ export default function ClueOverlay({ clue, category, stage, wager, secondsLeft,
                 className="flex flex-1 flex-col items-center justify-center gap-6"
               >
                 {clue.media?.type === 'image' && mediaUrl && (
-                  <img src={mediaUrl} alt="Clue" className="max-h-[45vh] rounded-lg object-contain" />
+                  <img
+                    src={mediaUrl}
+                    alt="Clue"
+                    className="max-h-[40vh] max-w-full rounded-lg object-contain"
+                  />
                 )}
                 {clue.media?.type === 'video' && mediaUrl && (
-                  <video src={mediaUrl} autoPlay controls className="max-h-[45vh] rounded-lg" />
+                  <video
+                    src={mediaUrl}
+                    autoPlay
+                    controls
+                    className="max-h-[40vh] max-w-full rounded-lg"
+                  />
                 )}
                 {clue.media?.type === 'audio' && (
                   <div className="flex flex-col items-center gap-2 text-slate-400">
@@ -105,7 +114,9 @@ export default function ClueOverlay({ clue, category, stage, wager, secondsLeft,
                   </div>
                 )}
                 {clue.prompt && (
-                  <p className="text-2xl font-semibold leading-snug md:text-4xl">{clue.prompt}</p>
+                  <p className="max-w-full break-words text-2xl font-semibold leading-snug md:text-4xl">
+                    {clue.prompt}
+                  </p>
                 )}
               </motion.div>
             )}
